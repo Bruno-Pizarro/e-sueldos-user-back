@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "8081:15672"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

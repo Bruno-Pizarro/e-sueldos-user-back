@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  mongo:
+    volumes:
+      - ./data:/data/db
+  rabbitmq:
+    container_name: rabbitmq-dev
+  app:
+    container_name: ts-node-app-dev
+    command: yarn dev -L
+
+volumes:
+  mongo-data:
+    driver: local

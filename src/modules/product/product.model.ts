@@ -2,10 +2,13 @@ import mongoose from 'mongoose';
 import paginate from '../paginate/paginate';
 import toJSON from '../toJSON/toJSON';
 import { IProductDoc, IProductModel } from './product.interfaces';
-import { Stock } from '../stock';
 
 const productSchema = new mongoose.Schema<IProductDoc, IProductModel>(
   {
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: mongoose.Types.ObjectId,
+    },
     name: {
       type: String,
       required: true,
@@ -39,19 +42,6 @@ const productSchema = new mongoose.Schema<IProductDoc, IProductModel>(
     timestamps: true,
   }
 );
-
-productSchema.post('save', async function (doc: IProductDoc, next) {
-  try {
-    if (!doc.stock) {
-      const stock = await Stock.create({ productId: doc.id });
-      doc.set({ stock: stock.id });
-      await doc.save();
-    }
-    next();
-  } catch (error: any) {
-    next(error);
-  }
-});
 
 // add plugin that converts mongoose to json
 productSchema.plugin(toJSON);

@@ -2,14 +2,14 @@ version: '3'
 
 services:
   mongo:
-    container_name: mongo
+    container_name: mongo-user
     image: mongo:4.2.1-bionic
     ports:
       - "27018:27017"
     networks:
       - backend
   app:
-    container_name: ts-node-app
+    container_name: ts-node-app-stock
     build: 
       context: .
       dockerfile: Dockerfile
@@ -20,18 +20,36 @@ services:
     ports:
       - ${PORT}:${PORT}
     environment: 
-      - MONGODB_URL=mongodb://mongo:27017/node-boilerplate
+      - MONGODB_URL=mongodb://mongo-user:27017/node-boilerplate
       - CLIENT_URL=${CLIENT_URL}
-      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - RABBITMQ_URL=${RABBITMQ_URL}
     links: 
       - mongo
-      - rabbitmq
     depends_on:
       - mongo
-      - rabbitmq
     networks:
       - backend
+      - rabbit_network
+  subscriber:
+    container_name: subscriber-user
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    env_file: .env
+    environment:
+      - RABBITMQ_URL=${RABBITMQ_URL}
+      - MONGODB_URL=mongodb://mongo-user:27017/node-boilerplate
+      - RABBITMQ_EXCHANGE=${RABBITMQ_EXCHANGE}
+    command: ["sh", "-c", "yarn run_sub"]
+    depends_on:
+      - mongo
+    networks:
+      - backend
+      - rabbit_network
 
 networks:
   backend:
-    driver: bridge    
+    driver: bridge
+  rabbit_network:
+    external: true

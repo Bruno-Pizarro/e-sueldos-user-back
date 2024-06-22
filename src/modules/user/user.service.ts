@@ -1,5 +1,6 @@
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
+import publisher from '../../rabbitmq/publisher';
 import User from './user.model';
 import ApiError from '../errors/ApiError';
 import { IOptions, QueryResult } from '../paginate/paginate';
@@ -14,7 +15,9 @@ export const createUser = async (userBody: NewCreatedUser): Promise<IUserDoc> =>
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
-  return User.create(userBody);
+  const user = await User.create(userBody);
+  await publisher.publishEvent('users.create', user);
+  return user;
 };
 
 /**
@@ -26,7 +29,9 @@ export const registerUser = async (userBody: NewRegisteredUser): Promise<IUserDo
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
-  return User.create(userBody);
+  const user = await User.create(userBody);
+  await publisher.publishEvent('users.create', user);
+  return user;
 };
 
 /**
@@ -73,6 +78,7 @@ export const updateUserById = async (
   }
   Object.assign(user, updateBody);
   await user.save();
+  await publisher.publishEvent('users.update', user);
   return user;
 };
 
@@ -87,5 +93,6 @@ export const deleteUserById = async (userId: mongoose.Types.ObjectId): Promise<I
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
   await user.deleteOne();
+  await publisher.publishEvent('users.delete', user);
   return user;
 };

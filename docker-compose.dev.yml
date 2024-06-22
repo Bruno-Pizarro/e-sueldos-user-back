@@ -4,10 +4,8 @@ services:
   mongo:
     volumes:
       - ./data:/data/db
-  rabbitmq:
-    container_name: rabbitmq-dev
   app:
-    container_name: ts-node-app-dev
+    container_name: ts-node-app-user-dev
     command: yarn dev -L
 
 volumes:

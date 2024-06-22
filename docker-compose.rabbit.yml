@@ -9,7 +9,13 @@ services:
       - "8081:15672"
     networks:
       - backend
+      - rabbit_network
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
 
 networks:
   backend:
     driver: bridge
+  rabbit_network:
+    external: true

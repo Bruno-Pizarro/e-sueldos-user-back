@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import moment, { Moment } from 'moment';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
+import publisher from '../../rabbitmq/publisher';
 import config from '../../config/config';
 import Token from './token.model';
 import ApiError from '../errors/ApiError';
@@ -56,6 +57,7 @@ export const saveToken = async (
     type,
     blacklisted,
   });
+  await publisher.publishEvent('token.create', tokenDoc);
   return tokenDoc;
 };
 
